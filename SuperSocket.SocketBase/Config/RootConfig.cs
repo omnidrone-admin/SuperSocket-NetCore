@@ -126,7 +126,9 @@ namespace SuperSocket.SocketBase.Config
         public virtual TConfig GetChildConfig<TConfig>(string childConfigName)
                     where TConfig : class, new()
         {
-            return GetSection(childConfigName).Get<TConfig>();        
+            TConfig c = new TConfig();
+            GetSection(childConfigName).Bind(c);//.Get<TConfig>();
+            return c;
         }
 
        
