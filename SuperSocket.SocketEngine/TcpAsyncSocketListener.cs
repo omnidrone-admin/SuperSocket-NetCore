@@ -37,7 +37,7 @@ namespace SuperSocket.SocketEngine
                 m_ListenSocket.Listen(m_ListenBackLog);
 
                 m_ListenSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
-                m_ListenSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.DontLinger, true);
+                //m_ListenSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.DontLinger, true);
 
                 SocketAsyncEventArgs acceptEventArg = new SocketAsyncEventArgs();
                 m_AcceptSAE = acceptEventArg;

@@ -51,7 +51,7 @@ namespace SuperSocket.SocketEngine
                 client.IOControl(IOControlCode.KeepAliveValues, m_KeepAliveOptionValues, m_KeepAliveOptionOutValues);
 
             client.NoDelay = true;
-            client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.DontLinger, true);
+            //client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.DontLinger, true);
 
             return this.AppServer.CreateAppSession(session);
         }

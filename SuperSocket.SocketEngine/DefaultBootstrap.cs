@@ -7,6 +7,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Reflection;
+using System.IO;
+using System.Runtime.Loader;
 #if !NETSTANDARD2_0
 using System.Configuration;
 using System.Runtime.Remoting;
@@ -226,8 +229,25 @@ namespace SuperSocket.SocketEngine
         /// <returns></returns>
         protected virtual IWorkItem CreateWorkItemInstance(string serviceTypeName, StatusInfoAttribute[] serverStatusMetadata)
         {
-            var serviceType = Type.GetType(serviceTypeName, true);
-            return Activator.CreateInstance(serviceType) as IWorkItem;
+            string[] names = serviceTypeName.Split(',');
+			AssemblyName requestedAssemblyName = new AssemblyName(names[1]);
+            string requestorPath = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location);
+			//string requestedAssemblyPath = Path.Combine(Path.GetDirectoryName(requestorPath), requestedAssemblyName.Name + ".dll");
+			string requestedAssemblyPath = Path.Combine(requestorPath, requestedAssemblyName.Name + ".dll");
+			Assembly ass = AssemblyLoadContext.Default.LoadFromAssemblyPath(requestedAssemblyPath);
+			var obj = ass.CreateInstance(names[0]);
+			return obj as IWorkItem;
+            /*
+            //var serviceType = Type.GetType(serviceTypeName, true);
+            //return Activator.CreateInstance(serviceType) as IWorkItem;
+			string currentPath = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location);
+			Console.Error.WriteLine("Assembly path" + currentPath);
+			string[] names = serviceTypeName.Split(',');
+			System.Reflection.Assembly ass = System.Reflection.Assembly.LoadFrom(@"/" + names[1]);
+			//System.Reflection.Assembly ass = System.Reflection.Assembly.LoadFrom(@"bin/Debug/netcoreapp2.0/" + names[1]);
+			var obj = ass.CreateInstance(names[0]);
+			return obj as IWorkItem;
+            */
         }
 
         internal virtual bool SetupWorkItemInstance(IWorkItem workItem, WorkItemFactoryInfo factoryInfo)
@@ -337,7 +357,7 @@ namespace SuperSocket.SocketEngine
             var exceptionSource = appServer as IExceptionSource;
 
             if (exceptionSource != null)
-                exceptionSource.ExceptionThrown += new EventHandler<ErrorEventArgs>(exceptionSource_ExceptionThrown);
+                exceptionSource.ExceptionThrown += new EventHandler<SuperSocket.Common.ErrorEventArgs>(exceptionSource_ExceptionThrown);
 
 
             var setupResult = false;
@@ -466,7 +486,7 @@ namespace SuperSocket.SocketEngine
             return true;
         }
 
-        void exceptionSource_ExceptionThrown(object sender, ErrorEventArgs e)
+        void exceptionSource_ExceptionThrown(object sender, SuperSocket.Common.ErrorEventArgs e)
         {
             m_GlobalLog.Error(string.Format("The server {0} threw an exception.", ((IWorkItemBase)sender).Name), e.Exception);
         }
